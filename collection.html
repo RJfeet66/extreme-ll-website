@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEW ARRIVALS | EXTREME-LL</title>
+    <style>
+        /* 复用 V3.1 的核心变量与基础样式 */
+        :root {
+            --bg-color: #0a0a0a; --text-primary: #ffffff; --text-secondary: #888888;
+            --accent-color: #FF5A00; --border-color: #333333;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); color: var(--text-primary); font-family: var(--font-main); }
+        a { text-decoration: none; color: inherit; }
+        img { width: 100%; display: block; }
+
+        /* 导航栏 */
+        header { padding: 20px 40px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; background: rgba(10,10,10,0.95); z-index: 100; }
+        .logo { font-size: 24px; font-weight: 900; letter-spacing: 2px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
+        .nav-links a:hover { color: var(--text-primary); }
+
+        /* 陈列页样式 */
+        .collection-header { padding: 60px 40px; border-bottom: 1px solid var(--border-color); }
+        .collection-title { font-size: 48px; text-transform: uppercase; font-weight: 900; margin-bottom: 10px; }
+        .breadcrumb { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+
+        .filter-bar {
+            padding: 15px 40px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; font-size: 12px; text-transform: uppercase;
+            position: sticky; top: 73px; background: var(--bg-color); z-index: 90;
+        }
+        .filter-group { display: flex; gap: 20px; cursor: pointer; }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 电脑端一行4个 */
+            border-bottom: 1px solid var(--border-color);
+        }
+        .grid-item {
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px;
+            position: relative;
+            transition: 0.2s;
+        }
+        .grid-item:hover { background-color: #141414; }
+        
+        /* [核心修改] 强制 4:5 (800x1000) 竖方图比例 */
+        .p-img { 
+            width: 100%; 
+            aspect-ratio: 4 / 5; /* 关键代码 */
+            object-fit: cover; 
+            margin-bottom: 20px; 
+            filter: brightness(0.9); 
+        }
+
+        .p-info { display: flex; justify-content: space-between; align-items: flex-start; }
+        .p-name { font-size: 14px; font-weight: bold; max-width: 70%; }
+        .p-price { font-family: var(--font-mono); font-size: 14px; color: var(--text-secondary); }
+        .p-tag { 
+            position: absolute; top: 10px; left: 10px; 
+            font-family: var(--font-mono); font-size: 10px; color: var(--accent-color); 
+            border: 1px solid var(--accent-color); padding: 2px 5px;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .product-grid { grid-template-columns: 1fr 1fr; } /* 手机一行2个 */
+            /* 删除了固定的高度限制，手机端也会自动遵循 aspect-ratio: 4/5 */
+            .nav-links { display: none; }
+            .collection-title { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">EXTREME-LL</div>
+        <nav class="nav-links">
+            <a href="index.html">首页</a>
+            <a href="#" style="color:white;">全部产品</a>
+            <a href="#">男子 MEN</a>
+            <a href="#">女子 WOMEN</a>
+        </nav>
+        <div>🛒 (0)</div>
+    </header>
+
+    <div class="collection-header">
+        <div class="breadcrumb">HOME / SHOP / NEW ARRIVALS</div>
+        <h1 class="collection-title">FW2025 新品系列</h1>
+        <p style="color:#888; max-width: 600px;">本季新品针对寒冷都市与高海拔户外场景设计。采用3M新雪丽KL金棉、P200/300、美利奴羊毛以及Alpha云朵绒等，全新轻量化高clo值材质，重新定义舒适保暖新标杆。</p>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span>FILTER 筛选 +</span>
+            <span>SORT 排序 +</span>
+        </div>
+        <div>12 PRODUCTS</div>
+    </div>
+
+    <!-- 这里的图片路径已经是 coll-1 到 coll-12 了 -->
+    <div class="product-grid">
+        <!-- 1号 -->
+        <a href="detail.html" class="grid-item">
+            <div class="p-tag">NEW</div>
+            <img src="images/coll-1.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT1061】P400 HIGH LOFT毛猴抓绒</div>
+                <div class="p-price">¥ 699</div>
+            </div>
+        </a>
+        <!-- 2号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-2.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT2113】尼龙四面弹288F加绒软壳裤</div>
+                <div class="p-price">¥ 399</div>
+            </div>
+        </a>
+        <!-- 3号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-3.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT2116】银标P棉两用棉裤卫裤</div>
+                <div class="p-price">¥ 699</div>
+            </div>
+        </a>
+        <!-- 4号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-4.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT1264】次时代Alpha云朵双面绒保暖抓绒衣</div>
+                <div class="p-price">¥ 399</div>
+            </div>
+        </a>
+        <!-- 5号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-5.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT2128】Alpha云朵双面绒保暖抓绒卫裤</div>
+                <div class="p-price">¥ 399</div>
+            </div>
+        </a>
+        <!-- 6号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-6.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT1030】3M KL金棉商务派克中长款棉服</div>
+                <div class="p-price">¥ 799</div>
+            </div>
+        </a>
+        <!-- 7号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-7.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT3010】Alpha云朵双面绒保暖圆顶帽</div>
+                <div class="p-price">¥ 139</div>
+            </div>
+        </a>
+        <!-- 8号 -->
+        <a href="detail.html" class="grid-item">
+            <div class="p-tag">HOT</div>
+            <img src="images/coll-8.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT1183】P300 P200中厚立领抓绒</div>
+                <div class="p-price">¥ 299</div>
+            </div>
+        </a>
+        <!-- 9号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-9.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【TZ1026】3M KL金暖棉120gsm棉服</div>
+                <div class="p-price">¥ 599</div>
+            </div>
+        </a>
+        <!-- 10号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-10.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT2092】3M新雪丽KL金暖棉60gsm棉裤</div>
+                <div class="p-price">¥ 599</div>
+            </div>
+        </a>
+        <!-- 11号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-11.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT2011】144F加绒软壳裤</div>
+                <div class="p-price">¥ 399</div>
+            </div>
+        </a>
+        <!-- 12号 -->
+        <a href="detail.html" class="grid-item">
+            <img src="images/coll-12.jpg" class="p-img" alt="Product">
+            <div class="p-info">
+                <div class="p-name">【ZT1207】Power Stretch Pro抓绒外套卫衣</div>
+                <div class="p-price">¥ 299</div>
+            </div>
+        </a>
+    </div>
+
+    <footer style="padding: 40px; text-align: center; border-top: 1px solid #333; font-size: 12px; color: #666;">
+        &copy; 2025 EXTREME-LL.
+    </footer>
+
+</body>
+</html>

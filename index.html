@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXTREME-LL | 城市机能官方网站 (V3.1 Intro)</title>
+    <style>
+      /* ==================== 
+       1. 核心变量定义 
+       ==================== */
+    :root {
+        --bg-color: #0a0a0a;         
+        --surface-color: #141414;    
+        --text-primary: #ffffff;     
+        --text-secondary: #888888;   
+        --accent-color: #FF5A00;     
+        --border-color: #333333;     
+        --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        --font-mono: 'Courier New', Courier, monospace; 
+        --container-width: 1200px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        font-family: var(--font-main);
+        line-height: 1.6;
+        overflow-x: hidden; /* 视频播放时禁止滚动 */
+        -webkit-font-smoothing: antialiased;
+    }
+
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    ul { list-style: none; }
+    img { max-width: 100%; display: block; }
+
+    .container { max-width: var(--container-width); margin: 0 auto; padding: 0 20px; }
+
+/* [优化] 橙色标签：加粗、更清晰、更有力量感 */
+    .tech-label {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* 改回主字体 */
+        font-weight: 800; /* ★ 极粗，像印章一样清晰 */
+        font-size: 11px;
+        color: var(--accent-color);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        border: 2px solid var(--accent-color); /* 边框稍微加粗一点点 */
+        padding: 4px 8px; /* 内边距加大，更舒展 */
+        display: inline-block;
+        margin-bottom: 12px;
+        background: rgba(0,0,0,0.7); /* 背景加深，增加对比度 */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5); /* 增加一点立体感 */
+    }
+
+    /* ==================== 
+       [Feature: Video Intro] 视频入场层
+       ==================== */
+    #intro-layer {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #000;
+        z-index: 9999;
+        display: flex; justify-content: center; align-items: center;
+        transition: opacity 1s ease, visibility 1s;
+    }
+    
+    /* 视频样式：始终填满屏幕 (Cover模式) */
+    #intro-video {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        object-fit: cover; 
+        opacity: 0.9;
+    }
+
+    /* 跳过按钮 */
+    .enter-btn {
+        position: absolute; bottom: 80px; z-index: 10000;
+        background: transparent; border: 1px solid rgba(255,255,255,0.5);
+        color: white; padding: 12px 30px; font-family: var(--font-mono);
+        cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+        transition: 0.3s; backdrop-filter: blur(5px); font-size: 12px;
+    }
+    .enter-btn:hover { background: var(--accent-color); border-color: var(--accent-color); color:black; }
+
+    /* 隐藏状态 */
+    body.intro-finished #intro-layer {
+        opacity: 0; visibility: hidden; pointer-events: none;
+    }
+    /* 视频结束后恢复页面滚动 */
+    body.intro-finished { overflow-y: auto; }
+
+    /* ==================== 
+       以下为 V3.0 标准样式
+       ==================== */
+    .scroll-reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+    .scroll-reveal.active { opacity: 1; transform: translateY(0); }
+
+    header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; padding: 20px 0; transition: background 0.3s, padding 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    header.scrolled { background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+    .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 24px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; position: relative; }
+    .logo::after { content: '.'; color: var(--accent-color); }
+    .nav-links { display: flex; gap: 40px; }
+    .nav-links a { font-size: 14px; font-weight: 500; text-transform: uppercase; color: var(--text-secondary); position: relative; }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-actions { display: flex; gap: 20px; align-items: center; }
+    .icon-btn { cursor: pointer; font-size: 18px; color: var(--text-primary); }
+
+    .mobile-menu-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); z-index: 1001; transition: right 0.4s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .mobile-menu-overlay.open { right: 0; }
+    .mobile-menu-links { display: flex; flex-direction: column; gap: 30px; text-align: center; }
+    .mobile-menu-links a { font-size: 24px; font-weight: bold; text-transform: uppercase; }
+    .close-menu-btn { position: absolute; top: 30px; right: 30px; font-size: 30px; cursor: pointer; }
+
+    .hero-slider-wrap { position: relative; width: 100%; height: 100vh; overflow: hidden; background: #000; cursor: grab; }
+    .hero-slider-wrap:active { cursor: grabbing; }
+    .slider-track { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); will-change: transform; }
+    .slide { min-width: 100%; height: 100%; position: relative; user-select: none; }
+    .slide-bg { width: 100%; height: 100%; background-size: cover; background-position: center; filter: brightness(0.75); }
+    .hero-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding-left: 5%; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; z-index: 10; pointer-events: none; background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%); }
+    .hero-title { font-size: 72px; line-height: 1.05; margin-bottom: 20px; letter-spacing: -2px; text-transform: uppercase; color: white; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .hero-desc { font-size: 18px; color: #ccc; margin-bottom: 40px; max-width: 500px; border-left: 2px solid var(--accent-color); padding-left: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .hero-btn { pointer-events: auto; display: inline-block; background-color: var(--text-primary); color: var(--bg-color); padding: 16px 40px; font-weight: 700; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; border: 2px solid var(--text-primary); }
+    .hero-btn:hover { background-color: transparent; color: var(--text-primary); }
+    .slider-dots { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 20; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #666; background: transparent; cursor: pointer; transition: all 0.3s; }
+    .dot.active { background: var(--accent-color); border-color: var(--accent-color); transform: scale(1.3); box-shadow: 0 0 10px rgba(255, 90, 0, 0.5); }
+
+    .stats-bar { background-color: black; border-bottom: 1px solid var(--border-color); padding: 40px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center; }
+    .stat-item h3 { font-size: 36px; font-weight: 700; color: var(--text-primary); margin-bottom: 5px; }
+    .stat-item p { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); text-transform: uppercase; }
+
+    .category-matrix { display: grid; grid-template-columns: repeat(4, 1fr); height: 350px; border-bottom: 1px solid var(--border-color); }
+    .cat-box { position: relative; overflow: hidden; border-right: 1px solid var(--border-color); cursor: pointer; }
+    .cat-box:last-child { border-right: none; }
+    .cat-bg { position: absolute; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; filter: grayscale(100%) brightness(0.6); }
+    .cat-box:hover .cat-bg { transform: scale(1.1); filter: grayscale(0%) brightness(0.8); }
+    .cat-content { position: absolute; bottom: 30px; left: 30px; z-index: 10; }
+    .cat-title { font-size: 20px; font-weight: 900; text-transform: uppercase; margin-bottom: 5px; }
+    .cat-sub { font-family: var(--font-mono); font-size: 11px; color: var(--accent-color); }
+
+    .section { padding: 120px 0; }
+    .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 60px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+    .section-title { font-size: 32px; text-transform: uppercase; }
+    .grid-layout { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 40px 20px; }
+    .product-card { background-color: transparent; cursor: pointer; }
+    .img-wrapper { position: relative; width: 100%; padding-bottom: 125%; background-color: var(--surface-color); overflow: hidden; margin-bottom: 20px; }
+    .img-wrapper img { position: absolute; width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+    .product-card:hover .img-wrapper img { transform: scale(1.05); }
+    .product-meta { display: flex; justify-content: space-between; align-items: flex-start; }
+    .p-title { font-size: 16px; font-weight: 700; margin-bottom: 5px; display: block; }
+    .p-desc { font-size: 13px; color: var(--text-secondary); }
+    .p-price { font-family: var(--font-mono); color: var(--accent-color); }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal-content { background: #1a1a1a; width: 90%; max-width: 900px; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #333; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .modal-img { width: 100%; height: 500px; object-fit: cover; background: #000; }
+    .modal-details { padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+    .modal-close { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 24px; cursor: pointer; z-index: 10; }
+    .modal-tag { color: var(--accent-color); font-family: var(--font-mono); font-size: 12px; margin-bottom: 10px; }
+    .modal-title { font-size: 28px; font-weight: bold; margin-bottom: 10px; line-height: 1.2; }
+    .modal-desc { color: #888; font-size: 14px; margin-bottom: 20px; }
+    .modal-price { font-size: 24px; font-family: var(--font-mono); color: var(--accent-color); margin-bottom: 30px; }
+    .modal-btn { background: #fff; color: #000; border: none; padding: 15px 0; text-transform: uppercase; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; }
+    .modal-btn:hover { background: var(--accent-color); color: #fff; }
+
+    .system-section { position: relative; padding: 120px 0; border-top: 1px solid var(--border-color); background-size: cover; background-position: center; background-color: #0f0f0f; }
+    .system-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.75); z-index: 1; }
+    .system-content-relative { position: relative; z-index: 2; }
+    .system-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+    .system-card { background-color: rgba(10, 10, 10, 0.8); padding: 60px 40px; transition: background 0.3s; backdrop-filter: blur(5px); }
+    .system-card:hover { background-color: rgba(255, 90, 0, 0.1); }
+    .system-icon { font-size: 32px; color: var(--text-secondary); margin-bottom: 30px; font-family: var(--font-mono); }
+    .system-title { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: var(--text-primary); }
+    .system-desc { color: #ccc; font-size: 14px; margin-bottom: 30px; }
+    .system-link { font-family: var(--font-mono); font-size: 12px; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; }
+
+    .feature-split { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border-color); }
+    .feature-img-box { min-height: 600px; background-size: cover; background-position: center; }
+    .feature-text { padding: 80px; display: flex; flex-direction: column; justify-content: center; background-color: #0a0a0a; }
+    .feature-text h2 { font-size: 40px; margin-bottom: 30px; line-height: 1.2; }
+    .tech-list li { margin-bottom: 20px; padding-left: 20px; border-left: 2px solid #333; transition: 0.3s; }
+    .tech-list li:hover { border-left-color: var(--accent-color); }
+    .tech-list strong { color: white; display: block; margin-bottom: 5px; }
+    .tech-list span { color: #888; font-size: 14px; }
+
+    .lookbook-section { padding: 120px 0; position: relative; }
+    .lookbook-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; height: 600px; }
+    .look-item { position: relative; overflow: hidden; background-color: #222; width: 100%; height: 100%; }
+    .look-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+    .look-item:hover img { transform: scale(1.05); }
+    .look-overlay { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px 15px; backdrop-filter: blur(5px); }
+    .look-loc { font-family: var(--font-mono); font-size: 10px; color: var(--accent-color); }
+    .look-desc { font-size: 12px; font-weight: bold; color: white; margin-top: 5px; }
+
+    .manifesto { padding: 150px 0; text-align: center; background: linear-gradient(180deg, #0a0a0a 0%, #111 100%); border-top: 1px solid var(--border-color); }
+    .manifesto-content { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+    .manifesto h2 { font-size: 48px; line-height: 1.2; margin-bottom: 40px; letter-spacing: -1px; text-transform: uppercase; }
+    .manifesto h2 span { color: var(--text-secondary); }
+    .manifesto p { font-size: 16px; color: var(--text-secondary); margin-bottom: 50px; }
+    .btn-outline { display: inline-block; border: 1px solid var(--text-primary); padding: 15px 40px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+    .btn-outline:hover { background-color: var(--text-primary); color: black; }
+
+    footer { background-color: #050505; padding: 80px 0 40px; border-top: 1px solid var(--border-color); font-size: 14px; color: #666; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 60px; }
+    .footer-logo { color: white; font-weight: bold; font-size: 20px; margin-bottom: 20px; display: block; }
+    .footer-col h4 { color: white; margin-bottom: 20px; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a:hover { color: var(--accent-color); }
+    .copyright { border-top: 1px solid #222; padding-top: 30px; display: flex; justify-content: space-between; }
+
+/* [优化] 所有橙色文字通用设置：统一加粗 */
+    .p-price, 
+    .modal-price, 
+    .cat-sub, 
+    .look-loc { 
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* 此时用标准字体 */
+        font-weight: 700; /* ★ 加粗 (Bold) */
+        color: var(--accent-color);
+        letter-spacing: 0.5px; /* 字间距微调，更精致 */
+    }
+
+    @media (max-width: 768px) {
+        .nav-links { display: none; }
+        .icon-btn[style*="none"] { display: block !important; }
+        .hero-title { font-size: 36px; }
+        .hero-desc { font-size: 14px; }
+        .stats-grid { grid-template-columns: 1fr; gap: 40px; }
+        .category-matrix { grid-template-columns: 1fr 1fr; height: auto; }
+        .cat-box { height: 200px; border-right: none; border-bottom: 1px solid var(--border-color); }
+        .feature-split { grid-template-columns: 1fr; }
+        .feature-img-box { min-height: 300px; }
+        .feature-text { padding: 40px 20px; }
+        .system-grid { grid-template-columns: 1fr; }
+        .lookbook-grid { grid-template-columns: 1fr; height: auto; gap: 10px; }
+        .look-item { height: 300px; }
+        .footer-grid { grid-template-columns: 1fr; gap: 30px; }
+        .manifesto h2 { font-size: 32px; }
+        .modal-content { grid-template-columns: 1fr; height: 90vh; overflow-y: auto; }
+        .modal-img { height: 300px; }
+    }
+    </style>
+</head>
+<body class="intro-active">
+
+    <!-- [Feature: Video Intro] 视频入场层 -->
+    <div id="intro-layer">
+        <!-- 自动播放、静音、内联播放、循环 -->
+        <video id="intro-video" muted autoplay playsinline loop>
+            <source src="https://lc-gluttony.s3.amazonaws.com/FXLV2V6d0C9H/VrOMscBG50kt7H6lp0631Vfm1G7eiUSo/intro.mp4" type="video/mp4">
+            您的浏览器不支持视频播放
+        </video>
+        <button class="enter-btn" id="skipBtn">ENTER SYSTEM / 进入系统</button>
+    </div>
+
+    <!-- 移动端侧滑菜单 -->
+    <div class="mobile-menu-overlay" id="mobileMenu">
+        <div class="close-menu-btn" onclick="toggleMenu()">×</div>
+        <div class="mobile-menu-links">
+            <a href="#">新品 NEW</a>
+            <a href="#">外套系列</a>
+            <a href="#">裤装系列</a>
+            <a href="#">配件/装备</a>
+            <a href="#">品牌故事</a>
+        </div>
+    </div>
+
+    <!-- 导航栏 -->
+    <header id="navbar">
+        <div class="container nav-inner">
+            <a href="#" class="logo">EXTREME-LL</a>
+            <nav class="nav-links">
+                <a href="#">新品 NEW</a>
+                <a href="#">外套系列</a>
+                <a href="#">裤装系列</a>
+                <a href="#">配件/装备</a>
+                <a href="#">品牌故事</a>
+            </nav>
+            <div class="nav-actions">
+                <span class="icon-btn">🔍</span>
+                <span class="icon-btn">🛒</span>
+                <span class="icon-btn" style="display:none;" onclick="toggleMenu()">☰</span> 
+            </div>
+        </div>
+    </header>
+
+    <!-- 首屏轮播区域 -->
+    <div class="hero-slider-wrap" id="heroSlider">
+        <div class="slider-track" id="sliderTrack">
+        <!-- Slide 1 -->
+<div class="slide">
+    <div class="slide-bg" style="background-image: url('images/hero-1.jpg');"></div>
+    <div class="hero-overlay">
+        <div class="hero-content-box scroll-reveal">
+            <span class="tech-label">FW/2025 COLLECTION</span>
+            <h1 class="hero-title">DEFY THE<br>ELEMENTS</h1>
+            <!-- 👇 这里找回了原来的中文文案 -->
+            <p class="hero-desc">融合尖端户外科技与都市极简美学。<br>为不妥协的探索者打造的全天候机能装备。</p>
+            <!-- 👇 这里的链接指向陈列页 -->
+            <a href="collection.html" class="hero-btn">探索当季新品</a>
+        </div>
+    </div>
+</div>
+            <!-- Slide 2 -->
+            <div class="slide">
+                <div class="slide-bg" style="background-image: url(images/hero-2.jpg);"></div>
+                <div class="hero-overlay">
+                    <div class="hero-content-box">
+                        <span class="tech-label">FLAGSHIP SERIES</span>
+                        <h1 class="hero-title">EXTREME-LL<br>TACTICAL</h1>
+                        <p class="hero-desc">Pro级防风雨硬壳冲锋衣。<br>20000mm+ 暴雨级防水，重新定义城市通勤防护标准。</p>
+                        <a href="#" class="hero-btn">查看旗舰装备</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="slide">
+                <div class="slide-bg" style="background-image: url(images/hero-3.jpg);"></div>
+                <div class="hero-overlay">
+                    <div class="hero-content-box">
+                        <span class="tech-label">CORE ESSENTIALS</span>
+                        <h1 class="hero-title">ALL-WEATHER<br>PROTECT</h1>
+                        <p class="hero-desc">功能科技面料建立全天候防线<br>从舒适到安心纵享每一段户外旅程。</p>
+                        <a href="#" class="hero-btn">浏览主力系列</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 4 -->
+            <div class="slide">
+                <div class="slide-bg" style="background-image: url(images/hero-4.jpg);"></div>
+                <div class="hero-overlay">
+                    <div class="hero-content-box">
+                        <span class="tech-label">MATERIAL TECH</span>
+                        <h1 class="hero-title">All STAGE<br>COMFORTABLE</h1>
+                        <p class="hero-desc">强悍防护，轻量体感，3D立体剪裁版型调校。<br>兼顾防护与舒适，畅行所有户外旅程</p>
+                        <a href="#" class="hero-btn">了解面料科技</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 5 -->
+            <div class="slide">
+                <div class="slide-bg" style="background-image: url(images/hero-5.jpg);"></div>
+                <div class="hero-overlay">
+                    <div class="hero-content-box">
+                        <span class="tech-label">SURVIVAL GUIDE</span>
+                        <h1 class="hero-title">INTO THE<br>WILD</h1>
+                        <p class="hero-desc">从硬壳保养技巧到野外失温急救。<br>不仅仅是卖衣服，这是给探索者的进阶指南。</p>
+                        <a href="#" class="hero-btn">阅读户外指南</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slider-dots" id="sliderDots"></div>
+    </div>
+
+    <!-- 核心数据栏 -->
+    <div class="stats-bar">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item scroll-reveal">
+                    <h3>ePTFE Membrane</h3>
+                    <p>20,000+ 防水指数 (Waterproof)</p>
+                </div>
+                <div class="stat-item scroll-reveal">
+                    <h3>Cordura®</h3>
+                    <p>军规级耐磨面料 (Durability)</p>
+                </div>
+                <div class="stat-item scroll-reveal">
+                    <h3>Merino Wool</h3>
+                    <p>美利奴 (Multi-functional)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分类矩阵 -->
+    <section class="category-matrix">
+        <div class="cat-box scroll-reveal">
+            <img src="images/cat-1.jpg" class="cat-bg" alt="Shells">
+            <div class="cat-content">
+                <div class="cat-title">Hard Shells</div>
+                <div class="cat-sub">硬壳 / 防护层</div>
+            </div>
+        </div>
+        <div class="cat-box scroll-reveal">
+            <img src="images/cat-2.jpg" class="cat-bg" alt="Pants">
+            <div class="cat-content">
+                <div class="cat-title">Dynamics</div>
+                <div class="cat-sub">裤装 / 机动层</div>
+            </div>
+        </div>
+        <div class="cat-box scroll-reveal">
+            <img src="images/cat-3.jpg" class="cat-bg" alt="Insulation">
+            <div class="cat-content">
+                <div class="cat-title">Insulation</div>
+                <div class="cat-sub">中间层 / 保暖</div>
+            </div>
+        </div>
+        <div class="cat-box scroll-reveal">
+            <img src="images/cat-4.jpg" class="cat-bg" alt="Gear">
+            <div class="cat-content">
+                <div class="cat-title">Systems</div>
+                <div class="cat-sub">配件 / 挂载</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 爆款产品区 -->
+    <section class="section container" id="products">
+        <div class="section-header scroll-reveal">
+            <div>
+                <span class="tech-label">SELECTED GOODS</span>
+                <h2 class="section-title">核心装备</h2>
+            </div>
+            <a href="#" style="border-bottom:1px solid #666; font-size:14px;">VIEW ALL PRODUCTS &rarr;</a>
+        </div>
+        <div class="grid-layout">
+            <!-- P1 -->
+            <div class="product-card scroll-reveal" onclick="openModal(this)">
+                <div class="img-wrapper">
+                    <img src="images/prod-1.jpg" alt="冲锋衣">
+                    <div style="position:absolute; top:10px; left:10px; background:var(--accent-color); color:black; font-size:10px; padding:2px 5px; font-weight:bold;">BEST SELLER</div>
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <a href="#" class="p-title">【ZT1039】<br>超纤P200抓绒衣</a>
+                        <span class="p-desc">亲肤保暖 / 持久锁温</span>
+                    </div>
+                    <span class="p-price">¥288</span>
+                </div>
+            </div>
+            <!-- P2 -->
+            <div class="product-card scroll-reveal" onclick="openModal(this)">
+                <div class="img-wrapper">
+                    <img src="images/prod-2.jpg" alt="机能裤">
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <a href="#" class="p-title">【ZT1028】<br>3M立领棉服（100gsm）</a>
+                        <span class="p-desc">高效保暖 / 抗污防泼水</span>
+                    </div>
+                    <span class="p-price">¥559</span>
+                </div>
+            </div>
+            <!-- P3 -->
+            <div class="product-card scroll-reveal" onclick="openModal(this)">
+                <div class="img-wrapper">
+                    <img src="images/prod-3.jpg" alt="夹克">
+                    <div style="position:absolute; top:10px; left:10px; background:white; color:black; font-size:10px; padding:2px 5px; font-weight:bold;">NEW</div>
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <a href="#" class="p-title">【ZT1072】<br>3M膨刻气绒连帽棉服</a>
+                        <span class="p-desc">3M新雪丽 / POMK气绒羽</span>
+                    </div>
+                    <span class="p-price">¥1,399</span>
+                </div>
+            </div>
+            <!-- P4 -->
+            <div class="product-card scroll-reveal" onclick="openModal(this)">
+                <div class="img-wrapper">
+                    <img src="images/prod-4.jpg" alt="配件">
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <a href="#" class="p-title">【ZT1130】<br>暴雨级防风雨冲锋衣</a>
+                        <span class="p-desc">Pore11e / 0.2纳米透湿薄膜</span>
+                    </div>
+                    <span class="p-price">¥599</span>
+                </div>
+            </div>
+            <!-- P5 -->
+            <div class="product-card scroll-reveal" onclick="openModal(this)">
+                <div class="img-wrapper">
+                    <img src="images/prod-5.jpg" alt="抓绒">
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <a href="#" class="p-title">【ZT2089】<br>巨灵神软壳裤</a>
+                        <span class="p-desc">MX等级 / 防风防雨雪</span>
+                    </div>
+                    <span class="p-price">¥539</span>
+                </div>
+            </div>
+             <!-- P6 -->
+             <div class="product-card scroll-reveal" onclick="openModal(this)">
+                <div class="img-wrapper">
+                    <img src="images/prod-6.jpg" alt="配件">
+                </div>
+                <div class="product-meta">
+                    <div>
+                        <a href="#" class="p-title">【ZT3010】<br>Alpha云朵绒保暖帽</a>
+                        <span class="p-desc">男女情侣款 / 爽肤保暖</span>
+                    </div>
+                    <span class="p-price">¥129</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+   <!-- 叠穿体系 -->
+    <section class="system-section" style="background-image: url('images/system-bg.jpg');">
+        <div class="system-overlay"></div> 
+        <div class="container system-content-relative">
+            <div class="scroll-reveal" style="text-align:center; margin-bottom:60px;">
+                <span class="tech-label">THE MODULAR SYSTEM</span>
+                <h2 class="section-title">全天候作战系统</h2>
+                <p style="color:#ddd; margin-top:10px;">三层着装法则，适应从城市通勤到极端户外的所有场景。</p>
+            </div>
+            <div class="system-grid">
+                <div class="system-card scroll-reveal">
+                    <div class="system-icon">L1</div>
+                    <h3 class="system-title">BASE LAYER<br>基础层</h3>
+                    <p class="system-desc">贴身穿着，负责快速吸湿排汗，保持皮肤干爽，是温控系统的核心基础。</p>
+                    <a href="#" class="system-link">查看基础层 ></a>
+                </div>
+                <div class="system-card scroll-reveal">
+                    <div class="system-icon" style="color:var(--text-primary)">L2</div>
+                    <h3 class="system-title">INSULATION<br>保暖层</h3>
+                    <p class="system-desc">中间层，通过抓绒或棉羽填充锁住空气，提供核心热量，轻量且易于收纳。</p>
+                    <a href="#" class="system-link">查看保暖层 ></a>
+                </div>
+                <div class="system-card scroll-reveal">
+                    <div class="system-icon">L3</div>
+                    <h3 class="system-title">PROTECTION<br>防护层</h3>
+                    <p class="system-desc">最外层硬壳，完全阻挡风雨侵袭，同时通过透气膜排出体内湿气。</p>
+                    <a href="#" class="system-link">查看防护层 ></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 科技叙事区 -->
+    <section class="feature-split">
+        <div class="feature-img-box" style="background-image: url('images/tech-bg.jpg');"></div>
+        <div class="feature-text scroll-reveal">
+            <span class="tech-label">TECHNOLOGY</span>
+            <h2>不仅仅是衣服<br>是你的生存系统</h2>
+            <p style="color:#888; margin-bottom:30px;">我们摒弃多余的装饰，将全部成本投入到面料科技与扣具细节中。</p>
+            <ul class="tech-list">
+                <li><strong>YKK® AquaGuard</strong><span>全系标配防水拉链，滴水不漏。</span></li>
+                <li><strong>NIFCO</strong><span>高强度工业扣具，极寒环境下操作依然清脆顺滑。</span></li>
+                <li><strong>ePTFE Membrane</strong><span>仿生微孔技术，物理级阻隔雨水，快速排出汗气。</span></li>
+                <li><strong>Merino</strong><span>进口美丽诺羊毛，天然温控系统，长效抑菌防臭。</span></li>
+                <li><strong>Cordura®</strong><span>军规高强纤维，抗撕裂耐磨强度是普通棉布的10倍。</span></li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- 实战图录 -->
+    <section class="lookbook-section container">
+        <div class="section-header scroll-reveal">
+            <div>
+                <span class="tech-label">FIELD REPORT</span>
+                <h2 class="section-title">实战测试</h2>
+            </div>
+            <div style="font-family:var(--font-mono); color:#666; font-size:12px;">LOCATION: TOKYO / HAKONE</div>
+        </div>
+        <div class="lookbook-grid">
+            <div class="look-item scroll-reveal">
+                <img src="images/look-1.jpg" alt="Look 1">
+                <div class="look-overlay">
+                    <div class="look-loc">COORD: 35.6895° N, 139.6917° E</div>
+                    <div class="look-desc">HIKING TRAVEL / 旅行徒步</div>
+                </div>
+            </div>
+            <div class="look-item scroll-reveal">
+                <img src="images/look-2.jpg" alt="Look 2">
+                <div class="look-overlay">
+                    <div class="look-loc">COORD: 34.0522° N, 118.2437° W</div>
+                    <div class="look-desc">SKIING SPORTS / 运动滑雪</div>
+                </div>
+            </div>
+            <div class="look-item scroll-reveal">
+                <img src="images/look-3.jpg" alt="Look 3">
+                <div class="look-overlay">
+                    <div class="look-loc">COORD: 45.4215° N, 75.6972° W</div>
+                    <div class="look-desc">URBAN COMMUTING / 城市通勤</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 品牌宣言 -->
+    <section class="manifesto">
+        <div class="manifesto-content scroll-reveal">
+            <span class="tech-label">PHILOSOPHY</span>
+            <h2>Form Follows Function.<br><span>Design For Survival.</span></h2>
+            <p>在这个混凝土森林中，你需要适应所有环境的装备。我们不创造时尚，我们创造工具。每一条缝线，每一个口袋，都有其存在的意义。</p>
+            <a href="#" class="btn-outline">阅读完整品牌故事</a>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <a href="#" class="footer-logo">EXTREME-LL.</a>
+                    <p>专为亚洲男性身型设计的城市户外机能品牌。<br>从写字楼到山野，无缝切换。</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Shop</h4>
+                    <ul>
+                        <li><a href="#">全部新品</a></li>
+                        <li><a href="#">外套系列</a></li>
+                        <li><a href="#">裤装系列</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">尺码指南</a></li>
+                        <li><a href="#">退换货政策</a></li>
+                        <li><a href="#">联系我们</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Follow Us</h4>
+                    <ul>
+                        <li><a href="#">Instagram</a></li>
+                        <li><a href="#">WeChat</a></li>
+                        <li><a href="#">RedBook</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <span>&copy; 2025 EXTREME-LL INC.</span>
+                <span style="font-family: var(--font-mono); font-size: 12px;">DESIGNED FOR SURVIVAL.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 产品弹窗结构 -->
+    <div class="modal-overlay" id="productModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal()">×</span>
+            <img src="" class="modal-img" id="modalImg">
+            <div class="modal-details">
+                <div class="modal-tag">EXTREME-LL GEAR</div>
+                <div class="modal-title" id="modalTitle">Product Title</div>
+                <div class="modal-price" id="modalPrice">¥ 0.00</div>
+                <div class="modal-desc" id="modalDesc">Description goes here...</div>
+                <button class="modal-btn">立即购买 / BUY NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 交互逻辑 -->
+    <script>
+        // 1. 视频入场控制
+        const introVideo = document.getElementById('intro-video');
+        const introLayer = document.getElementById('intro-layer');
+        const skipBtn = document.getElementById('skipBtn');
+
+        function endIntro() {
+            document.body.classList.add('intro-finished');
+            setTimeout(() => {
+                introLayer.style.display = 'none';
+            }, 1000);
+        }
+
+        // 视频播放结束 或 点击按钮 触发
+        introVideo.onended = endIntro;
+        skipBtn.onclick = endIntro;
+
+        // 尝试自动播放
+        introVideo.play().catch(error => {
+            console.log("Autoplay prevented, waiting for user click.");
+        });
+
+        // 2. 导航栏滚动变色
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('navbar');
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        // 3. 滚动入场动画
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+        // 4. 移动端菜单
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+
+        // 5. 产品弹窗
+        function openModal(card) {
+            const modal = document.getElementById('productModal');
+            const img = card.querySelector('img').src;
+            const title = card.querySelector('.p-title').innerText;
+            const price = card.querySelector('.p-price').innerText;
+            const desc = card.querySelector('.p-desc').innerText;
+
+            document.getElementById('modalImg').src = img;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalPrice').innerText = price;
+            document.getElementById('modalDesc').innerText = desc;
+            
+            modal.classList.add('active');
+        }
+        function closeModal(event) {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        // 6. 轮播逻辑
+        const track = document.getElementById('sliderTrack');
+        const slides = document.querySelectorAll('.slide');
+        const dotsContainer = document.getElementById('sliderDots');
+        const slideCount = slides.length;
+        let currentIndex = 0;
+        let isDragging = false;
+        let startPos = 0;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+        let autoPlayInterval;
+        const autoPlaySpeed = 4000; 
+
+        function createDots() {
+            for (let i = 0; i < slideCount; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                if (i === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => {
+                    currentIndex = i; setPositionByIndex(); updateDots(); startAutoPlay();
+                });
+                dotsContainer.appendChild(dot);
+            }
+        }
+        function updateDots() {
+            document.querySelectorAll('.dot').forEach((dot, index) => {
+                index === currentIndex ? dot.classList.add('active') : dot.classList.remove('active');
+            });
+        }
+        function initSlider() {
+            createDots(); startAutoPlay();
+            track.addEventListener('mousedown', touchStart);
+            track.addEventListener('touchstart', touchStart);
+            track.addEventListener('mouseup', touchEnd);
+            track.addEventListener('mouseleave', touchEnd);
+            track.addEventListener('touchend', touchEnd);
+            track.addEventListener('mousemove', touchMove);
+            track.addEventListener('touchmove', touchMove);
+        }
+        function startAutoPlay() {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = setInterval(() => nextSlide(), autoPlaySpeed);
+        }
+        function nextSlide() {
+            currentIndex = (currentIndex < slideCount - 1) ? currentIndex + 1 : 0;
+            setPositionByIndex(); updateDots(); startAutoPlay();
+        }
+        function setPositionByIndex() {
+            currentTranslate = currentIndex * -window.innerWidth;
+            prevTranslate = currentTranslate;
+            track.style.transform = `translateX(${currentTranslate}px)`;
+        }
+        function touchStart(event) {
+            isDragging = true;
+            startPos = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+            clearInterval(autoPlayInterval); track.style.transition = 'none';
+        }
+        function touchMove(event) {
+            if (isDragging) {
+                const currentPosition = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+                currentTranslate = prevTranslate + (currentPosition - startPos);
+                track.style.transform = `translateX(${currentTranslate}px)`;
+            }
+        }
+        function touchEnd() {
+            isDragging = false;
+            const movedBy = currentTranslate - prevTranslate;
+            track.style.transition = 'transform 0.5s ease-out';
+            if (movedBy < -100 && currentIndex < slideCount - 1) currentIndex += 1;
+            if (movedBy > 100 && currentIndex > 0) currentIndex -= 1;
+            setPositionByIndex(); updateDots(); startAutoPlay();
+        }
+        window.addEventListener('resize', setPositionByIndex);
+        initSlider(); touchStart({type:'mouse', pageX:0}); 
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALPHA SV JACKET | EXTREME-LL</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a; --text-primary: #ffffff; --text-secondary: #888888;
+            --accent-color: #FF5A00; --border-color: #333333;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); color: var(--text-primary); font-family: var(--font-main); }
+        
+        /* 导航栏 */
+        header { padding: 20px 40px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 900; text-decoration: none; color: white; }
+
+        /* === [NEW] 详情页布局 === */
+        .pdp-container {
+            display: grid;
+            grid-template-columns: 60% 40%; /* 左图右文比例 */
+            max-width: 1400px; margin: 0 auto;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 左侧：图片瀑布流 */
+        .pdp-gallery {
+            padding: 40px;
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .pdp-gallery img { width: 100%; display: block; }
+
+        /* 右侧：固定信息栏 (Sticky) */
+        .pdp-info {
+            padding: 60px 40px;
+            position: sticky; top: 0; /* 关键：滚动时固定 */
+            height: 100vh;
+            overflow-y: auto; /* 内容太长时内部滚动 */
+        }
+
+        /* 信息排版 */
+        .breadcrumbs { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; }
+        .product-title { font-size: 42px; font-weight: 900; line-height: 1; margin-bottom: 10px; text-transform: uppercase; }
+        .product-price { font-family: var(--font-mono); font-size: 24px; color: var(--accent-color); margin-bottom: 30px; }
+        .product-desc { font-size: 14px; line-height: 1.6; color: #ccc; margin-bottom: 40px; }
+
+        /* 尺码选择器 */
+        .size-selector { margin-bottom: 40px; }
+        .size-label { font-size: 12px; font-weight: bold; margin-bottom: 10px; display: block; }
+        .size-options { display: flex; gap: 10px; }
+        .size-btn {
+            width: 50px; height: 50px; border: 1px solid #444; 
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.2s;
+        }
+        .size-btn:hover, .size-btn.active { border-color: var(--accent-color); color: var(--accent-color); }
+
+        /* 购买按钮 */
+        .add-to-cart {
+            width: 100%; padding: 20px; background: white; color: black;
+            border: none; font-weight: bold; font-size: 16px; cursor: pointer;
+            text-transform: uppercase; transition: 0.3s;
+        }
+        .add-to-cart:hover { background: var(--accent-color); color: white; }
+
+        /* 折叠面板 (Accordion) - 始祖鸟风格 */
+        .accordion { margin-top: 40px; border-top: 1px solid var(--border-color); }
+        details {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0; cursor: pointer;
+        }
+        summary { font-weight: bold; list-style: none; display: flex; justify-content: space-between; }
+        summary::after { content: '+'; }
+        details[open] summary::after { content: '-'; }
+        .accordion-content { padding-top: 15px; font-size: 13px; color: #888; line-height: 1.6; }
+
+        /* 移动端适配 */
+        @media (max-width: 900px) {
+            .pdp-container { grid-template-columns: 1fr; } /* 变单栏 */
+            .pdp-info { position: static; height: auto; padding: 20px; }
+            .pdp-gallery { border-right: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">EXTREME-LL</a>
+        <div style="font-size:12px;">SHOP</div>
+    </header>
+
+    <div class="pdp-container">
+        <!-- 左侧图片区 (请替换为您的高清大图) -->
+     <!-- 左侧图片区 -->
+    <div class="pdp-gallery">
+        <!-- 第一张：主图 -->
+        <img src="images/detail-1.jpg" alt="Front View">
+        
+        <!-- 第二张：背面/侧面 -->
+        <img src="images/detail-2.jpg" alt="Back View"> 
+        
+        <!-- 第三张：细节特写 -->
+        <img src="images/detail-3.jpg" alt="Detail Zoom">
+        
+        <!-- 第四张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-4.jpg" alt="Lifestyle">
+        
+        <!-- 第五张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-5.jpg" alt="Lifestyle">
+
+        <!-- 第六张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-6.jpg" alt="Lifestyle">
+
+        <!-- 第七张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-7.jpg" alt="Lifestyle">
+
+        <!-- 第八张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-8.jpg" alt="Lifestyle">
+
+        <!-- 第九张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-9.jpg" alt="Lifestyle">
+
+        <!-- 第十张（如果有的话，没有就删掉这行） -->
+        <img src="images/detail-10.jpg" alt="Lifestyle">
+    </div>
+
+        <!-- 右侧信息区 -->
+        <div class="pdp-info">
+            <div class="breadcrumbs">首页 / 男装 / 中间层保暖 /【ZT1061】P400 HIGH LOFT毛猴抓绒</div>
+            <h1 class="product-title">P400<br>HIGH LOFT毛猴抓绒</h1>
+            <div class="product-price">¥ 699.00</div>
+            
+            <p class="product-desc">
+               静态保暖大魔王，鸟家已停产的大力神版型，P400高克重地表中间层王者。P绒保暖面料中，保暖性能登顶的产品在不增加重量、压缩性和透气性的前提下最优化保暖效果。
+            </p>
+
+            <div class="size-selector">
+                <span class="size-label">SELECT SIZE / 选择尺码</span>
+                <div class="size-options">
+                    <div class="size-btn">M</div>
+                    <div class="size-btn active">L</div>
+                    <div class="size-btn">XL</div>
+                    <div class="size-btn">XXL</div>
+                </div>
+            </div>
+
+            <!-- 点击跳转淘宝 -->
+            <!-- 这里的 href 引号里直接粘链接，不容易出错 -->
+<a href="https://item.taobao.com/item.htm?id=999634484610&spm=a1z10.3-c-s.w4002-21191798725.10.4af05f73yX3bwO" target="_blank" style="text-decoration:none;">
+    <button class="add-to-cart">
+        立即购买 / BUY NOW
+    </button>
+</a>
+
+            <!-- 科技参数折叠 -->
+            <div class="accordion">
+                <details>
+                    <summary>CORE PERFORMANCE / 核心性能</summary>
+                    <div class="accordion-content">
+                        • P400保暖等级<br>
+                        • clo值高达2.34<br>
+                        • 透气性高达373mm/s<br>
+                        • 高蓬松暖重比
+                    </div>
+                </details>
+                <details>
+                    <summary>MATERIALS / 面料材质</summary>
+                    <div class="accordion-content">
+                        面料内侧：HIGH LOFT毛猴<br>
+                        面料外侧：高性能P200抓绒<br>
+                        重量：597g
+                    </div>
+                </details>
+                <details>
+                    <summary>FUNCTION / 功能体验</summary>
+                    <div class="accordion-content">
+                        • 保暖<br>
+                        • 透气<br>
+                        • 亲肤<br>
+                        • 抑菌<br>
+                        • 轻量化<br>
+                        • 高弹性<br>
+                        • 可压缩性
+                    </div>
+                </details>
+                <details>
+                    <summary>SCENE / 适用场景</summary>
+                    <div class="accordion-content">
+                        • 登山<br>
+                        • 徒步<br>
+                        • 滑雪<br>
+                        • 露营<br>
+                        • 通勤<br>
+                        • 居家<br>
+                        • 旅行
+                    </div>
+                </details>
+                <details>
+                    <summary>SIZE FITTING / 模特试穿</summary>
+                    <div class="accordion-content">
+                        模特数据<br>
+                        身高：176cm<br>
+                        体重：75kg<br>
+                        试穿：L码
+                    </div>
+                </details>
+                <details>
+                    <summary>CARE / 保养指南</summary>
+                    <div class="accordion-content">
+                        温水机洗 (40°C)。两次漂洗。请勿使用衣物柔顺剂。中温烘干。
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的尺码选择交互
+        const sizes = document.querySelectorAll('.size-btn');
+        sizes.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizes.forEach(s => s.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+
+</body>
+</html>
